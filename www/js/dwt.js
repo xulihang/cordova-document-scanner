@@ -57,7 +57,7 @@ function initRemoteDWT(ip) {
       Host: ip, 
       Port: '18622', 
       PortSSL: '18623', 
-      UseLocalService:'true'
+      UseLocalService:'false'
     };
    Dynamsoft.DWT.CreateDWTObjectEx(
       dwtConfig, 
