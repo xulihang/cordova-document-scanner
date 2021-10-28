@@ -65,16 +65,16 @@
             <div style="height:calc(100% - 50px);overflow-y:auto;">
                 <div id="camera" class="tabcontent">
                     <select id="camerasource"></select>
-                    <input id="captureButton" type="button" value="Capture Images" onclick="CaptureImages();" />
+                    <div>
+                        Camera Mode:
+                        <label>
+                            <input type="radio" value="document" name="cameraMode" id="cameraModeDoc" checked/>Document</label>
+                        <label>
+                            <input type="radio" value="picture" name="cameraMode" id="cameraModePic"/>Picture</label>
+                    </div>
                     <input id="switchButton" type="button" value="Hide Video" onclick="SwitchViews();" />
                 </div>
                 <div id="scan" class="tabcontent">
-                    <div id="desktopscan">
-                        <input onclick="Scan();" type="button" value="Local Scan">
-                        <select size="1" id="source"></select>
-
-                        
-                    </div>
                     <div id="remotescan">
                         <input onclick="RemoteScan();" type="button" value="Remote Scan">
                         <select class="source" size="1" id="remote">

@@ -11,7 +11,6 @@ ip.onchange = function () {
     initRemoteDWT(ip.value);
 }
 
-document.getElementById("desktopscan").style.display="none";
 var console = window['console'] ? window['console'] : { 'log': function () { } };
 
 Dynamsoft.DWT.RegisterEvent('OnWebTwainReady', Dynamsoft_OnReady); // Register OnWebTwainReady event. This event fires as soon as Dynamic Web TWAIN is initialized and ready to be used
@@ -28,26 +27,16 @@ function Dynamsoft_OnReady() {
         DWObject.Viewer.width="100%";
         DWObject.Viewer.height="100%";
         DWObject.SetViewMode(2, 2);
-        SetIfWebcamPlayVideo(false);    
-        //loadLocalScannersList();                
-        
-
+        SetIfWebcamPlayVideo(false);
         loadCamerasList();
         document.getElementById('camerasource').onchange = function () {
             var deviceId = document.getElementById("camerasource").options[document.getElementById("camerasource").selectedIndex].value;
             DWObject.Addon.Camera.selectSource(deviceId).then(function () {
                 SetIfWebcamPlayVideo(true);
                 document.getElementById("switchButton").style.display = '';
-                document.getElementById("captureButton").disabled = "";
             }, function (ex) { console.log(ex.message); });
         }
     }
-}
-
-function loadLocalScannersList(){
-    var count = DWObject.SourceCount; // Get how many sources are installed in the system
-    for (var i = 0; i < count; i++)
-        document.getElementById("source").options.add(new Option(DWObject.GetSourceNameItems(i), i)); // Add the sources in a drop-down list
 }
 
 function loadCamerasList(){        
@@ -123,35 +112,26 @@ function registerTransferEvent(dwt){
   });
 }
 
-function CaptureImages() {
-    if (DWObject) {
-        DWObject.Addon.Camera.capture().then(function () {
-            DWObject.Viewer.render();
-            SetIfWebcamPlayVideo(false);
-        }, function (ex) {
-            console.log(ex.message);
-            SetIfWebcamPlayVideo(false);
-        });
-    }
-}
-
 function SetIfWebcamPlayVideo(bShow) {
     if (bShow) {
-        DWObject.Addon.Camera.play(null, { width: 2560, height: 1440 },true).then(function (r) {
+        var camerasource = document.getElementById("camerasource").options[document.getElementById("camerasource").selectedIndex].value;
+        var cameramode = "document";
+        if (document.getElementById("cameraModePic").checked){
+            cameramode = "picture";
+        }
+        document.getElementById("switchButton").value = "Loading";
+        DWObject.Addon.Camera.showVideo(camerasource, { width: 2594, height: 1920 }, cameramode, false).then(function (r) {
             isVideoOn = true;
-            document.getElementById("captureButton").style.backgroundColor = "";
-            document.getElementById("captureButton").disabled = "";
             document.getElementById("switchButton").value = "Hide Video";
         }, function (ex) {
             console.log(ex.message);
             DWObject.Addon.Camera.stop();
+            document.getElementById("switchButton").value = "Show Video";
         });
     }
     else {
-        DWObject.Addon.Camera.stop();
+        DWObject.Addon.Camera.closeVideo();
         isVideoOn = false;
-        document.getElementById("captureButton").style.backgroundColor = "#aaa";
-        document.getElementById("captureButton").disabled = "disabled";
         document.getElementById("switchButton").value = "Show Video";
 
     }
@@ -165,10 +145,6 @@ function SwitchViews() {
         // stop the video
         SetIfWebcamPlayVideo(false);
     }
-}
-
-function Scan(){
-    AcquireImage(false);
 }
 
 function RemoteScan(){
@@ -223,34 +199,6 @@ function AcquireImage(isRemote) {
             console.log("sourceIndex: "+sourceIndex);
             DWObjectRemote.AcquireImage(deviceConfiguration, OnAcquireImageSuccess, OnAcquireImageFailure);
         }                            
-    }
-    else
-    {
-        if (DWObject) {        
-            var OnAcquireImageSuccess, OnAcquireImageFailure = function () {
-                console.log("local scan done");
-                //DWObject.CloseSource();
-            };
-            DWObject.SelectSourceByIndex(document.getElementById("source").selectedIndex);                
-            DWObject.CloseSource();
-            DWObject.OpenSource();                    
-            DWObject.PixelType=pixelType;
-            DWObject.IfFeederEnabled = feederEnabled;
-            DWObject.IfDuplexEnabled = duplexEnabled;
-            DWObject.IfShowUI=showUI;
-            DWObject.Resolution=resolution;
-            console.log("sourceIndex: "+document.getElementById("source").selectedIndex);
-            if (document.getElementById("ADF").checked && DWObject.IfFeederEnabled == true)  // if paper is NOT loaded on the feeder
-            {
-                if (DWObject.IfFeederLoaded != true && DWObject.ErrorCode == 0) {
-                    alert("No paper detected! Please load papers and try again!");
-                    return;
-                }
-            }
-
-            DWObject.IfDisableSourceAfterAcquire = true;    // Scanner source will be disabled/closed automatically after the scan.
-            DWObject.AcquireImage(OnAcquireImageSuccess, OnAcquireImageFailure);
-        }
     }
 
 }
